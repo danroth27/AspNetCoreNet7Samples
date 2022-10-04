@@ -25,7 +25,7 @@ app.MapGet("/cached", Gravatar.WriteGravatar).CacheOutput();
 
 app.MapGet("/nocache", Gravatar.WriteGravatar).CacheOutput(x => x.NoCache());
 
-app.MapGet("/profile", Gravatar.WriteGravatar).CacheOutput("NoCache");
+app.MapGet("/policy", Gravatar.WriteGravatar).CacheOutput("NoCache");
 
 app.MapGet("/attribute", [OutputCache(PolicyName = "NoCache")] (context) => Gravatar.WriteGravatar(context));
 
@@ -44,13 +44,21 @@ app.MapGet("/query", Gravatar.WriteGravatar).CacheOutput(p => p.SetVaryByQuery("
 
 app.MapGet("/vary", Gravatar.WriteGravatar).CacheOutput(c => c.VaryByValue((context) => new KeyValuePair<string, string>("time", (DateTime.Now.Second % 2).ToString(CultureInfo.InvariantCulture))));
 
-long requests = 0;
+long lockRequests = 0;
+long noLockRequests = 0;
 
 // Locking is enabled by default
 app.MapGet("/lock", async (context) =>
 {
     await Task.Delay(1000);
-    await context.Response.WriteAsync($"<pre>{requests++}</pre>");
+    await context.Response.WriteAsync($"<pre>{lockRequests++}</pre>");
+}).CacheOutput(p => p.Expire(TimeSpan.FromMilliseconds(1)));
+
+
+app.MapGet("/nolock", async (context) =>
+{
+    await Task.Delay(1000);
+    await context.Response.WriteAsync($"<pre>{noLockRequests++}</pre>");
 }).CacheOutput(p => p.SetLocking(false).Expire(TimeSpan.FromMilliseconds(1)));
 
 // Etag
@@ -63,9 +71,6 @@ app.MapGet("/etag", async (context) =>
     context.Response.Headers.ETag = etag;
 
     await Gravatar.WriteGravatar(context);
-
-    var cacheContext = context.Features.Get<IOutputCacheFeature>()?.Context;
-
 }).CacheOutput();
 
 // When the request header If-Modified-Since is provided, return 304 if the cached entry is older

@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
-    <!-- Turn on preview features so we can use Http3 -->
+    <!-- Turn on preview features -->
     <EnablePreviewFeatures>True</EnablePreviewFeatures>
   </PropertyGroup>
 
