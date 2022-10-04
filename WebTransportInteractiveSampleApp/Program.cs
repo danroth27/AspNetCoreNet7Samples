@@ -22,13 +22,13 @@ var certStr = Convert.ToBase64String(hash);
 builder.WebHost.ConfigureKestrel((context, options) =>
 {
     // website configured port
-    options.Listen(IPAddress.Any, 5001, listenOptions =>
+    options.Listen(IPAddress.Any, 5551, listenOptions =>
     {
         listenOptions.UseHttps();
         listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
     });
     // webtransport configured port
-    options.Listen(IPAddress.Any, 5002, listenOptions =>
+    options.Listen(IPAddress.Any, 5552, listenOptions =>
     {
         listenOptions.UseHttps(certificate);
         listenOptions.UseConnectionLogging();
